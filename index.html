@@ -1013,8 +1013,10 @@
         
         const _err = console.error;
         console.error = function(...args) {
-            _err.apply(console, args);
             const str = args.join(' ');
+            if (str.includes("inference_feedback_manager") || str.includes("signature") || str.includes("feedback_manager")) return;
+
+            _err.apply(console, args);
             if (str.includes("MediaPipe") || str.includes("ONNX") || str.includes("WASM") || str.includes("Init") || str.includes("failed")) {
                 showDebug(str, true);
             }
@@ -1022,11 +1024,11 @@
 
         const _warn = console.warn;
         console.warn = function(...args) {
-            _warn.apply(console, args);
             const str = args.join(' ');
             // Filter out internal MediaPipe inference_feedback_manager warnings to keep UI clean
-            if (str.includes("inference_feedback_manager")) return;
+            if (str.includes("inference_feedback_manager") || str.includes("signature") || str.includes("feedback_manager")) return;
 
+            _warn.apply(console, args);
             if (str.includes("MediaPipe") || str.includes("ONNX") || str.includes("timestamp") || str.includes("inference")) {
                 showDebug(str, false);
             }
