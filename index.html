@@ -12,7 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     
     <!-- ONNX Runtime Web Local Serving -->
-    <script src="/static/ort.min.js"></script>
+    <script src="static/ort.min.js"></script>
 
     <!-- Global diagnostics capture for early scripting & network errors -->
     <script>
@@ -1029,7 +1029,7 @@
             }
         };
 
-        import { PoseLandmarker, FilesetResolver } from "/static/vision_bundle.mjs";
+        import { PoseLandmarker, FilesetResolver } from "./static/vision_bundle.mjs";
 
         // Global variables & engine states
         let poseLandmarker = null;
@@ -1557,7 +1557,7 @@
         // --- Engine Initialization (MediaPipe WASM and ONNX Web) ---
 
         // Set paths for ONNX Runtime Web WASM binaries to load from standard CDN
-        ort.env.wasm.wasmPaths = '/static/';
+        ort.env.wasm.wasmPaths = 'static/';
         ort.env.wasm.numThreads = 1;
         ort.env.wasm.proxy = false;
         ort.env.wasm.simd = false; // SIMD를 비활성화하여 Safari 등 특정 브라우저 엔진에서 발생하는 WASM 메모리 정렬 및 컴파일 오류를 원천 차단합니다.
@@ -1590,10 +1590,10 @@
 
         async function startPreloadingAssets() {
             const preloadFiles = [
-                { key: "pose_landmarker", url: "/pose_landmarker_full.task", name: "포즈 추적 모델 (9.4 MB)", size: 9398198 },
-                { key: "squat", url: "/models/squat.onnx", name: "스쿼트 AI 모델 (314 KB)", size: 313915 },
-                { key: "pushup", url: "/models/pushup.onnx", name: "푸시업 AI 모델 (314 KB)", size: 313915 },
-                { key: "pullup", url: "/models/pullup.onnx", name: "풀업 AI 모델 (314 KB)", size: 313915 }
+                { key: "pose_landmarker", url: "pose_landmarker_full.task", name: "포즈 추적 모델 (9.4 MB)", size: 9398198 },
+                { key: "squat", url: "models/squat.onnx", name: "스쿼트 AI 모델 (314 KB)", size: 313915 },
+                { key: "pushup", url: "models/pushup.onnx", name: "푸시업 AI 모델 (314 KB)", size: 313915 },
+                { key: "pullup", url: "models/pullup.onnx", name: "풀업 AI 모델 (314 KB)", size: 313915 }
             ];
 
             const totalBytes = preloadFiles.reduce((acc, f) => acc + f.size, 0);
@@ -1667,7 +1667,7 @@
             
             try {
                 const vision = await FilesetResolver.forVisionTasks(
-                    "/static/wasm"
+                    "static/wasm"
                 );
                 
                 // preloaded pose_landmarker buffer를 Uint8Array로 감싸서 바로 로드
@@ -1715,7 +1715,7 @@
                 
                 // 1차: URL 경로 기반 로딩
                 try {
-                    onnxSession = await ort.InferenceSession.create(`/models/${exercise}.onnx`, sessionOptions);
+                    onnxSession = await ort.InferenceSession.create(`models/${exercise}.onnx`, sessionOptions);
                     console.log(`${exercise} ONNX model loaded via URL path.`);
                 } catch (urlErr) {
                     // 2차 fallback: 프리로드된 버퍼 사용
