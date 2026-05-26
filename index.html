@@ -1024,6 +1024,9 @@
         console.warn = function(...args) {
             _warn.apply(console, args);
             const str = args.join(' ');
+            // Filter out internal MediaPipe inference_feedback_manager warnings to keep UI clean
+            if (str.includes("inference_feedback_manager")) return;
+
             if (str.includes("MediaPipe") || str.includes("ONNX") || str.includes("timestamp") || str.includes("inference")) {
                 showDebug(str, false);
             }
