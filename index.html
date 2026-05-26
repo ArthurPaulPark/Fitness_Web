@@ -858,6 +858,12 @@
 
             <p class="loader-cache-tip">⚠️ 첫 접속 시에만 다운로드하며, 이후에는 브라우저 캐시에서 즉시 로드됩니다.</p>
 
+            <!-- TTS 활성화용 시작 버튼 (로딩 완료 후 표시) -->
+            <button id="start-btn" onclick="handleStartButton()"
+                style="display:none; margin-top:24px; width:100%; padding:14px; background:var(--primary); color:white; border:none; border-radius:12px; font-size:1rem; font-weight:600; cursor:pointer; box-shadow:0 4px 12px rgba(0,113,227,0.3); transition: all 0.2s ease;">
+                ▶ 운동 시작
+            </button>
+
             <!-- Diagnostic error console -->
             <div id="loader-error-log"
                 style="display: none; margin-top: 20px; padding: 14px; background: rgba(244, 63, 94, 0.08); border: 1px dashed var(--accent-rose); border-radius: 12px; font-family: monospace; font-size: 0.78rem; color: #fda4af; text-align: left; max-height: 120px; overflow-y: auto; box-shadow: 0 0 10px rgba(244, 63, 94, 0.15);">
@@ -1691,9 +1697,9 @@
 
                 await initEngine();
 
-                // Smoothly dissolve the loading overlay
-                const loader = document.getElementById("loader-overlay");
-                loader.classList.add("fade-out");
+                // 로딩 완료 → 시작 버튼 표시 (클릭으로 TTS 활성화 후 오버레이 해제)
+                statusText.innerText = "준비 완료! 아래 버튼을 눌러 운동을 시작하세요.";
+                document.getElementById("start-btn").style.display = "block";
 
             } catch (err) {
                 console.error("Asset preloading failed:", err);
@@ -2246,6 +2252,22 @@
             window.speechSynthesis.getVoices();
             startPreloadingAssets();
         }
+
+        // 시작 버튼 클릭 핸들러 — 사용자 제스처 안에서 TTS 엔진 활성화
+        window.handleStartButton = function () {
+            // 빈 발화로 Web Speech API를 사용자 제스처 컨텍스트 내에서 초기화
+            const unlock = new SpeechSynthesisUtterance('');
+            window.speechSynthesis.speak(unlock);
+
+            // 로딩 오버레이 제거
+            const loader = document.getElementById("loader-overlay");
+            loader.classList.add("fade-out");
+
+            // 인트로 안내 TTS
+            setTimeout(() => {
+                speakTTS("AI PT 스튜디오 준비 완료. 자세를 잡고 운동을 시작해보세요.", true);
+            }, 300);
+        };
 
         if (document.readyState === 'loading') {
             window.addEventListener('DOMContentLoaded', initApp);
