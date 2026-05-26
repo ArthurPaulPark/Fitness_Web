@@ -14,27 +14,3 @@
 * **`models/`**: 학습이 완비된 스쿼트, 푸시업, 풀업 GRU 신경망 ONNX 가중치 폴더
 
 ---
-
-## 🚀 깃허브 페이지(GitHub Pages) 초간단 배포 방법
-
-터미널을 실행하고 **이 `web_deploy` 폴더 안으로 이동한 뒤** 아래의 명령어를 입력하면 10초 만에 나만의 공식 웹사이트가 배포됩니다.
-
-```bash
-# 1. 깃 초기화 및 커밋
-git init
-git add .
-git commit -m "deploy: Premium AI PT Studio web release"
-
-# 2. 브랜치명 설정 및 본인의 원격 깃허브 저장소 주소 추가
-git branch -M main
-git remote add origin https://github.com/<본인의-깃허브-ID>/<저장소-이름>.git
-
-# 3. 깃허브 원격 서버로 전송
-git push -u origin main
-```
-
-### ⚙️ 깃허브 웹 서비스 활성화 절차 (마지막 단계)
-1. 생성하신 깃허브 레포지토리 웹사이트로 이동합니다.
-2. 상단 메뉴의 **`Settings` (설정)** ➡ 좌측의 **`Pages` (페이지)** 메뉴를 클릭합니다.
-3. `Build and deployment` 아래의 **`Branch`** 설정을 **`main`** 브랜치 및 **`/ (root)`** 경로로 선택한 뒤 **`Save` (저장)** 버튼을 누릅니다.
-4. 약 1분 후 생성되는 **`https://<깃허브-ID>.github.io/<저장소-이름>/`** 공식 주소로 언제 어디서나 AI PT 서비스를 즐기실 수 있습니다!
