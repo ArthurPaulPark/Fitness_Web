@@ -1,9 +1,9 @@
-name: Build and deploy JAR app to Azure Web App
+name: Build and deploy app to Azure Web App
 
 on:
   push:
     branches:
-      - main  # main 브라우저에 코드가 올라갈 때마다 실행
+      - main
 
 jobs:
   build-and-deploy:
@@ -13,19 +13,13 @@ jobs:
     - name: Checkout GitHub code
       uses: actions/checkout@v4
 
-    - name: Set up Java version
-      uses: actions/setup-java@v4
-      with:
-        java-version: '21'
-        distribution: 'temurin'
-
-    - name: Build with Maven (or Gradle)
-      # 현재 프로젝트가 메이븐이면 아래대로, 그래들이면 `./gradlew build`로 변경하세요.
-      run: mvn clean package -DskipTests 
+    # 빌드 도구가 없으므로 프로젝트 폴더 전체를 그대로 압축하여 배포합니다.
+    - name: Zip artifact for deployment
+      run: zip -r release.zip ./*
 
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v3
       with:
         app-name: 'fitnessgrubyarthur'
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-        package: '*.jar' # 빌드된 jar 파일 경로에 맞게 수정
+        package: 'release.zip'
