@@ -17,9 +17,11 @@ jobs:
     - name: Zip artifact for deployment
       run: zip -r release.zip ./*
 
+# 4. 완성된 단일 실행형 app.jar 파일을 Azure에 배포하고 강제 실행
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v3
       with:
         app-name: 'fitnessgrubyarthur'
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-        package: 'release.zip'
+        package: 'app.jar'
+        startup-command: 'java -jar /home/site/wwwroot/app.jar' # 이 줄을 추가합니다!
