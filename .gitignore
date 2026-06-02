@@ -1,4 +1,12 @@
-# OS system files
+# Compiled Java files
+*.class
+
+# Project specific databases (Sensitive Data!)
+*.db
+*.enc
+secure_workout_db.enc
+users_secure.db
+users.enc
+
+# OS files
 .DS_Store
-Thumbs.db
-desktop.ini
