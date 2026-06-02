@@ -3,6 +3,10 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
 import java.io.*;
 import java.net.InetSocketAddress;
+import java.net.URLDecoder;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -14,16 +18,30 @@ import java.util.*;
  */
 public class WorkoutServer {
     private static final String USER_DB = "users_secure.db";
-    private static final int PORT = 8080;
+    private static final int DEFAULT_PORT = 8080;
+    private static final Path WEB_ROOT = Paths.get(".").toAbsolutePath().normalize();
 
     public static void main(String[] args) throws IOException {
-        HttpServer server = HttpServer.create(new InetSocketAddress(PORT), 0);
+        int port = getPort();
+        HttpServer server = HttpServer.create(new InetSocketAddress("0.0.0.0", port), 0);
         server.createContext("/api/login", new LoginHandler());
         server.createContext("/api/workout", new WorkoutHandler());
+        server.createContext("/", new StaticFileHandler());
         server.setExecutor(null);
         System.out.println("🛡️ [Security Expert Mode] 서버가 시작되었습니다.");
         System.out.println("🔒 로그인/회원가입 분리 모드 활성화 (ID 중복 방지)");
+        System.out.println("🌐 웹 앱 포트: " + port);
         server.start();
+    }
+
+    private static int getPort() {
+        String port = System.getenv("PORT");
+        if (port == null || port.isBlank()) return DEFAULT_PORT;
+        try {
+            return Integer.parseInt(port);
+        } catch (NumberFormatException e) {
+            return DEFAULT_PORT;
+        }
     }
 
     private static String hashPassword(String password) {
@@ -53,7 +71,7 @@ public class WorkoutServer {
                 String decoded = new String(Base64.getDecoder().decode(body), StandardCharsets.UTF_8);
                 
                 // 형식: "userId:password:action"
-                String[] parts = decoded.split(":");
+                String[] parts = decoded.split(":", 3);
                 if (parts.length < 3) {
                     sendResponse(exchange, 400, "{\"status\":\"fail\", \"message\":\"잘못된 요청 형식\"}");
                     return;
@@ -82,6 +100,8 @@ public class WorkoutServer {
                         }
                     }
                 }
+            } else {
+                sendResponse(exchange, 405, "{\"status\":\"fail\", \"message\":\"POST 요청만 허용됩니다.\"}");
             }
         }
     }
@@ -102,6 +122,8 @@ public class WorkoutServer {
                 } else {
                     sendResponse(exchange, 400, "{\"status\":\"error\", \"message\":\"Invalid Data\"}");
                 }
+            } else {
+                sendResponse(exchange, 405, "{\"status\":\"error\", \"message\":\"POST 요청만 허용됩니다.\"}");
             }
         }
         
@@ -111,6 +133,54 @@ public class WorkoutServer {
                 return avgScore >= 0 && avgScore <= 100;
             } catch (Exception e) { return false; }
         }
+    }
+
+    static class StaticFileHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            boolean isHead = exchange.getRequestMethod().equalsIgnoreCase("HEAD");
+            if (!exchange.getRequestMethod().equalsIgnoreCase("GET") && !isHead) {
+                sendText(exchange, 405, "Method Not Allowed", "text/plain; charset=utf-8");
+                return;
+            }
+
+            String requestPath = URLDecoder.decode(exchange.getRequestURI().getPath(), StandardCharsets.UTF_8);
+            if (requestPath.equals("/")) requestPath = "/index.html";
+
+            Path filePath = WEB_ROOT.resolve(requestPath.substring(1)).normalize();
+            if (!filePath.startsWith(WEB_ROOT) || !Files.isRegularFile(filePath)) {
+                sendText(exchange, 404, "Not Found", "text/plain; charset=utf-8");
+                return;
+            }
+
+            byte[] bytes = Files.readAllBytes(filePath);
+            addWebHeaders(exchange);
+            exchange.getResponseHeaders().set("Content-Type", getContentType(filePath));
+            if (isHead) {
+                exchange.sendResponseHeaders(200, -1);
+                exchange.close();
+                return;
+            }
+            exchange.sendResponseHeaders(200, bytes.length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(bytes);
+            }
+        }
+    }
+
+    private static String getContentType(Path filePath) {
+        String name = filePath.getFileName().toString().toLowerCase(Locale.ROOT);
+        if (name.endsWith(".html")) return "text/html; charset=utf-8";
+        if (name.endsWith(".js") || name.endsWith(".mjs")) return "text/javascript; charset=utf-8";
+        if (name.endsWith(".css")) return "text/css; charset=utf-8";
+        if (name.endsWith(".json")) return "application/json; charset=utf-8";
+        if (name.endsWith(".wasm")) return "application/wasm";
+        if (name.endsWith(".onnx")) return "application/octet-stream";
+        if (name.endsWith(".task")) return "application/octet-stream";
+        if (name.endsWith(".png")) return "image/png";
+        if (name.endsWith(".jpg") || name.endsWith(".jpeg")) return "image/jpeg";
+        if (name.endsWith(".svg")) return "image/svg+xml";
+        return "application/octet-stream";
     }
 
     private static synchronized String findUser(String id, String hashedPw) {
@@ -178,10 +248,23 @@ public class WorkoutServer {
         exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
         exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "POST, OPTIONS");
         exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type");
+        addWebHeaders(exchange);
+    }
+
+    private static void addWebHeaders(HttpExchange exchange) {
+        exchange.getResponseHeaders().set("Cross-Origin-Opener-Policy", "same-origin");
+        exchange.getResponseHeaders().set("Cross-Origin-Embedder-Policy", "require-corp");
+        exchange.getResponseHeaders().set("Cross-Origin-Resource-Policy", "same-origin");
     }
 
     private static void sendResponse(HttpExchange exchange, int status, String response) throws IOException {
+        sendText(exchange, status, response, "application/json; charset=utf-8");
+    }
+
+    private static void sendText(HttpExchange exchange, int status, String response, String contentType) throws IOException {
         byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
+        addWebHeaders(exchange);
+        exchange.getResponseHeaders().set("Content-Type", contentType);
         exchange.sendResponseHeaders(status, bytes.length);
         OutputStream os = exchange.getResponseBody();
         os.write(bytes);
