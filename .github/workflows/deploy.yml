@@ -19,19 +19,14 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
 
-    # 1. 자바 소스 컴파일 (모든 .java 파일을 컴파일)
     - name: Compile Java Source
-      run: |
-        javac *.java
+      run: javac *.java
 
-    # 2. JAR 파일 생성
-    # manifest.txt를 만들어 메인 클래스를 지정하고 필요한 파일들을 포함합니다.
     - name: Package Application into Executable JAR
       run: |
         echo "Main-Class: WorkoutServer" > manifest.txt
         jar cvfm app.jar manifest.txt *.class models/ static/ index.html coi-serviceworker.js pose_landmarker_full.task README.md
 
-    # 3. 생성된 app.jar를 Azure에 배포
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v3
       with:
