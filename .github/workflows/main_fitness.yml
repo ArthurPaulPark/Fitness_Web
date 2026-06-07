@@ -1,0 +1,122 @@
+<<<<<<< HEAD:.github/workflows/main_fitnessgrubyarthur.yml
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
+name: Build and deploy JAR app to Azure Web App - fitnessgrubyarthur
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read #This is required for actions/checkout
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java version
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'microsoft'
+
+      - name: Compile and Package Application
+        run: |
+          javac *.java
+          echo "Main-Class: WorkoutServer" > manifest.txt
+          jar cvfm app.jar manifest.txt *.class
+          zip -r release.zip app.jar models/ static/ index.html coi-serviceworker.js pose_landmarker_full.task README.md
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v4
+        with:
+          name: java-app
+          path: '${{ github.workspace }}/release.zip'
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+=======
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
+name: Build and deploy JAR app to Azure Web App - Fitness
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read #This is required for actions/checkout
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java version
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'microsoft'
+
+      - name: Build with Maven
+        run: mvn clean install
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v4
+        with:
+          name: java-app
+          path: '${{ github.workspace }}/target/*.jar'
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+>>>>>>> f115b4b58854f3291e46c39c24f142f76551b240:.github/workflows/main_fitness.yml
+    permissions:
+      id-token: write #This is required for requesting the JWT
+      contents: read #This is required for actions/checkout
+  
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: java-app
+      
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+<<<<<<< HEAD:.github/workflows/main_fitnessgrubyarthur.yml
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_0C67D378C2C0456C8BDD398F7AE43180 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_CB2FB47691DC43B0B128154F8DF077B0 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_EA45185612C3403384E34DC103A9A904 }}
+
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'fitnessgrubyarthur'
+          slot-name: 'Production'
+          package: 'release.zip'
+=======
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_2B3EDCE5E2E2417B86B16AD2FD0CB97C }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_5E830E7619FB475282D81125C41EB401 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_637125EC9B384E3781378DBB9FCB6052 }}
+
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'Fitness'
+          slot-name: 'Production'
+          package: '*.jar'
+          
+>>>>>>> f115b4b58854f3291e46c39c24f142f76551b240:.github/workflows/main_fitness.yml
