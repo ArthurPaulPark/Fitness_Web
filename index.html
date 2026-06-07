@@ -1652,9 +1652,9 @@
         async function startPreloadingAssets() {
             const preloadFiles = [
                 { key: "pose_landmarker", url: "pose_landmarker_full.task", name: "포즈 추적 모델 (9.4 MB)", size: 9398198 },
-                { key: "squat", url: "models/squat.onnx", name: "스쿼트 AI 모델 (314 KB)", size: 313915 },
-                { key: "pushup", url: "models/pushup.onnx", name: "푸시업 AI 모델 (314 KB)", size: 313915 },
-                { key: "pullup", url: "models/pullup.onnx", name: "풀업 AI 모델 (314 KB)", size: 313915 }
+                { key: "squat", url: "models/squat.onnx?v=3", name: "스쿼트 AI 모델 (314 KB)", size: 313603 },
+                { key: "pushup", url: "models/pushup.onnx?v=3", name: "푸시업 AI 모델 (314 KB)", size: 313603 },
+                { key: "pullup", url: "models/pullup.onnx?v=3", name: "풀업 AI 모델 (314 KB)", size: 313603 }
             ];
 
             const totalBytes = preloadFiles.reduce((acc, f) => acc + f.size, 0);
@@ -1776,7 +1776,7 @@
 
                 // 1차: URL 경로 기반 로딩
                 try {
-                    onnxSession = await ort.InferenceSession.create(`models/${exercise}.onnx`, sessionOptions);
+                    onnxSession = await ort.InferenceSession.create(`models/${exercise}.onnx?v=3`, sessionOptions);
                     console.log(`${exercise} ONNX model loaded via URL path.`);
                 } catch (urlErr) {
                     // 2차 fallback: 프리로드된 버퍼 사용
