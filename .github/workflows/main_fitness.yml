@@ -64,3 +64,4 @@ jobs:
           app-name: 'fitnessgrubyarthur'
           slot-name: 'Production'
           package: 'release.zip'
+          startup-command: 'java -jar app.jar'
