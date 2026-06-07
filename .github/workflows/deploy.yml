@@ -22,21 +22,12 @@ jobs:
     - name: Compile Java Source
       run: javac *.java
 
-<<<<<<< HEAD
-    # 3. 자바 클래스 패키징 및 실행 환경 구축 (ZIP 아카이브 생성)
     - name: Package Application
-=======
-    - name: Package Application into Executable JAR
->>>>>>> d50fa83acff3d2f3a0dad79682d5552e666503a8
       run: |
         echo "Main-Class: WorkoutServer" > manifest.txt
         jar cvfm app.jar manifest.txt *.class
         zip -r release.zip app.jar models/ static/ index.html coi-serviceworker.js pose_landmarker_full.task README.md
 
-<<<<<<< HEAD
-    # 4. release.zip 배포 및 startup command 설정
-=======
->>>>>>> d50fa83acff3d2f3a0dad79682d5552e666503a8
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v3
       with:
