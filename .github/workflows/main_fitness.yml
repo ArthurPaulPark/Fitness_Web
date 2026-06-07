@@ -1,7 +1,7 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy JAR app to Azure Web App - fitnessgrubyarthur
+name: Build and deploy JAR app to Azure Web App - Fitness
 
 on:
   push:
@@ -24,18 +24,14 @@ jobs:
           java-version: '21'
           distribution: 'microsoft'
 
-      - name: Compile and Package Application
-        run: |
-          javac *.java
-          echo "Main-Class: WorkoutServer" > manifest.txt
-          jar cvfm app.jar manifest.txt *.class
-          zip -r release.zip app.jar models/ static/ index.html coi-serviceworker.js pose_landmarker_full.task README.md
+      - name: Build with Maven
+        run: mvn clean install
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: java-app
-          path: '${{ github.workspace }}/release.zip'
+          path: '${{ github.workspace }}/target/*.jar'
 
   deploy:
     runs-on: ubuntu-latest
@@ -53,15 +49,15 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_0C67D378C2C0456C8BDD398F7AE43180 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_CB2FB47691DC43B0B128154F8DF077B0 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_EA45185612C3403384E34DC103A9A904 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_496A2990B84348A8855E42938684C0F9 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_2CEFA0DD405B434E9BC2955D71BB80B5 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_7A0C9A5256F74275ADCC7C6A2A3DE38C }}
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'fitnessgrubyarthur'
+          app-name: 'Fitness'
           slot-name: 'Production'
-          package: 'release.zip'
-          startup-command: 'java -jar app.jar'
+          package: '*.jar'
+          
