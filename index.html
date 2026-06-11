@@ -1124,6 +1124,10 @@
         let isOnnxRunning = false; // ONNX 추론 중복 실행 방지 플래그
         let mediapipeFrameCounter = 0; // MediaPipe 호출 빈도 제어용
 
+        // Off-screen scaling canvas for optimizing CPU inference on high-resolution videos
+        const offscreenCanvas = document.createElement('canvas');
+        const offscreenCtx = offscreenCanvas.getContext('2d');
+
         // Exponential Moving Average Landmark Smoothing Filter (Zero-latency stabilizer)
         let smoothedLandmarks = null;
         const SMOOTHING_FACTOR = 0.22; // lower is smoother, higher is more responsive (optimized for noise reduction)
@@ -1917,7 +1921,24 @@
                 lastMpTimestamp = mpTimestamp;
 
                 try {
-                    const results = poseLandmarker.detectForVideo(video, mpTimestamp);
+                    // Capping input frame resolution to 640px max dimension for CPU delegate safety
+                    const maxDim = 640;
+                    let w = video.videoWidth;
+                    let h = video.videoHeight;
+                    if (w > maxDim || h > maxDim) {
+                        if (w > h) {
+                            h = Math.round((h * maxDim) / w);
+                            w = maxDim;
+                        } else {
+                            w = Math.round((w * maxDim) / h);
+                            h = maxDim;
+                        }
+                    }
+                    offscreenCanvas.width = w;
+                    offscreenCanvas.height = h;
+                    offscreenCtx.drawImage(video, 0, 0, w, h);
+
+                    const results = poseLandmarker.detectForVideo(offscreenCanvas, mpTimestamp);
                     // tasks-vision API 규격에 맞춰 landmarks와 poseLandmarks 둘 다 대응하도록 수정
                     const landmarks = results.landmarks || results.poseLandmarks;
 
