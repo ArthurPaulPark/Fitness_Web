@@ -217,6 +217,12 @@
             border-radius: 14px;
             overflow: hidden;
             border: 1px solid rgba(0, 0, 0, 0.06);
+            transition: all 0.2s ease;
+        }
+
+        .camera-wrapper.dragover {
+            border: 2px dashed #0071e3;
+            background: rgba(0, 113, 227, 0.05);
         }
 
         video#webcam {
@@ -875,8 +881,8 @@
         </div>
     </div>
 
-    <!-- Login Overlay -->
-    <div id="login-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:10000; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(10px);">
+    <!-- Login Overlay (Disabled for static client-side run) -->
+    <div id="login-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:10000; display:none; align-items:center; justify-content:center; backdrop-filter:blur(10px);">
         <div style="background:white; padding:40px; border-radius:20px; width:90%; max-width:400px; text-align:center;">
             <h2 style="margin-bottom:10px;">AI PT 로그인</h2>
             <p style="color:#666; margin-bottom:30px;">기존 기록을 불러오거나 새로 등록하세요.</p>
@@ -910,6 +916,12 @@
                 <video id="webcam" autoplay playsinline muted></video>
                 <canvas id="canvas-stream"></canvas>
 
+                <!-- Drag and drop indicator -->
+                <div id="video-drop-indicator" style="display:none; position:absolute; inset:0; background:rgba(0,113,227,0.2); flex-direction:column; align-items:center; justify-content:center; color:white; font-size:1.2rem; font-weight:bold; backdrop-filter:blur(4px); z-index:10; pointer-events:none; border:2px dashed #0071e3; border-radius:14px;">
+                    <span style="font-size:2.5rem; margin-bottom:10px;">📥</span>
+                    <span>여기에 동영상 파일을 내려놓으세요</span>
+                </div>
+
                 <div class="camera-overlay">
                     <div class="overlay-top">
                         <span id="guide-badge" class="overlay-badge fps-badge">FPS --</span>
@@ -929,12 +941,17 @@
                 </div>
             </div>
 
-            <div class="sound-controller">
-                <span>🔊 실시간 브라우저 100% 온디바이스 음성 코칭 및 경보 효과음 활성화</span>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="voice-enable" checked>
-                    <span class="toggle-slider"></span>
-                </label>
+            <div class="sound-controller" style="flex-wrap: wrap; gap: 15px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span>🔊 실시간 브라우저 100% 온디바이스 음성 코칭 및 경보 효과음 활성화</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="voice-enable" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <button id="btn-webcam" class="btn btn-primary" style="display: none; padding: 6px 12px; font-size: 0.85rem; background: #0071e3; border-radius: 8px; font-weight: 600; color: white; border: none; cursor: pointer;" onclick="switchToWebcam()">
+                    📷 실시간 카메라로 전환
+                </button>
             </div>
         </section>
 
@@ -1044,7 +1061,7 @@
 
                 <div class="actions-row">
                     <button class="btn btn-primary" onclick="resetStats()">🔄 세션 기록 리셋</button>
-                    <button class="btn" style="background: var(--accent-emerald); color: white;" onclick="exportSessionData()">💾 결과 저장 (Java 서버)</button>
+                    <button class="btn" style="background: var(--accent-emerald); color: white;" onclick="exportSessionData()">💾 결과 저장 (로컬 저장)</button>
                 </div>
             </div>
 
@@ -1587,9 +1604,9 @@
                 if (re < 170) activeElbows.push(re);
                 const avgElbow = activeElbows.length > 0 ? (activeElbows.reduce((a, b) => a + b, 0) / activeElbows.length) : 180;
 
-                if (avgElbow > 100) {
+                if (avgElbow > 100 && avgElbow < 140) {
                     feedbacks.push([0, "턱이 바에 닿을 때까지 올려주세요"]);
-                } else if (avgElbow > 80) {
+                } else if (avgElbow > 80 && avgElbow <= 100) {
                     feedbacks.push([1, "조금만 더 올려주세요"]);
                 }
 
@@ -1926,18 +1943,15 @@
                         landmarkHistory.push({ left_shoulder_x: lm[11].x });
                         if (landmarkHistory.length > 30) landmarkHistory.shift();
 
-                        const stateData = stateMachineInstance.update(angles, activeExercise, 0);
-                        const scoreData = calculateScore(angles, activeExercise, poseLabel, landmarkHistory, stateData.state);
-                        const feedbackText = generateFeedback(angles, activeExercise, scoreData, stateData.state);
-
-                        // If currently in down state, check if posture has reached a good/correct state
-                        if (stateData.state === "down") {
+                        // Check correctness BEFORE updating the state machine to avoid race conditions.
+                        // We also decouple the strict "poseLabel === 'Good'" requirement from counting.
+                        if (stateMachineInstance.state === "down") {
                             let isCorrectThisFrame = false;
                             if (activeExercise === "squat") {
                                 const knee = angles["knee"];
                                 const trunk = angles["trunk"];
                                 if (knee !== undefined && trunk !== undefined) {
-                                    if (knee <= 105 && trunk >= 60 && poseLabel === "Good") {
+                                    if (knee <= 105 && trunk >= 60) {
                                         isCorrectThisFrame = true;
                                     }
                                 }
@@ -1945,7 +1959,7 @@
                                 const elbow = angles["elbow"];
                                 const bodyLine = angles["body_line"];
                                 if (elbow !== undefined && bodyLine !== undefined) {
-                                    if (elbow <= 100 && bodyLine >= 160 && poseLabel === "Good") {
+                                    if (elbow <= 100 && bodyLine >= 160) {
                                         isCorrectThisFrame = true;
                                     }
                                 }
@@ -1953,7 +1967,7 @@
                                 const le = angles["left_elbow"];
                                 const re = angles["right_elbow"];
                                 if (le !== undefined && re !== undefined) {
-                                    if (le <= 80 && re <= 80 && Math.abs(le - re) <= 20 && poseLabel === "Good") {
+                                    if (le <= 80 && re <= 80 && Math.abs(le - re) <= 20) {
                                         isCorrectThisFrame = true;
                                     }
                                 }
@@ -1963,6 +1977,10 @@
                                 stateMachineInstance.hasReachedGoodPoseThisRep = true;
                             }
                         }
+
+                        const stateData = stateMachineInstance.update(angles, activeExercise, 0);
+                        const scoreData = calculateScore(angles, activeExercise, poseLabel, landmarkHistory, stateData.state);
+                        const feedbackText = generateFeedback(angles, activeExercise, scoreData, stateData.state);
 
                         // 4. Draw skeleton
                         drawSkeletonOverlay(lm, poseLabel);
@@ -2274,11 +2292,9 @@
             }
         };
 
-        window.exportSessionData = async function () {
-            if(!loggedInUserId) { alert("로그인이 필요합니다."); return; }
-            
+        window.exportSessionData = function () {
             const sessionData = {
-                userId: loggedInUserId,
+                userId: "LocalUser",
                 exercise: activeExercise,
                 totalReps: totalReps,
                 avgScore: parseFloat(document.getElementById('sum-avg').innerText),
@@ -2288,21 +2304,12 @@
             };
 
             try {
-                const jsonStr = JSON.stringify(sessionData);
-                const encodedData = btoa(unescape(encodeURIComponent(jsonStr)));
-
-                const response = await fetch('/api/workout', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain' },
-                    body: encodedData
-                });
-
-                if (response.ok) {
-                    const result = await response.json();
-                    alert("✅ " + loggedInUserId + "님, 기록이 Java 서버에 저장되었습니다!\n");
-                }
+                const history = JSON.parse(localStorage.getItem('workout_history') || '[]');
+                history.push(sessionData);
+                localStorage.setItem('workout_history', JSON.stringify(history));
+                alert("✅ 세션 기록이 브라우저 로컬 저장소(localStorage)에 성공적으로 저장되었습니다!");
             } catch (error) {
-                alert("❌ 전송 실패. Java 서버가 켜져 있는지 확인하세요.");
+                alert("❌ 저장 중 오류가 발생했습니다: " + error.message);
             }
         };
 
@@ -2346,6 +2353,77 @@
             setTimeout(() => {
                 speakTTS("AI PT 스튜디오 준비 완료. 자세를 잡고 운동을 시작해보세요.", true);
             }, 300);
+        };
+
+        // Drag and Drop Event Listeners for Video Files
+        const wrapper = document.querySelector('.camera-wrapper');
+        const dropIndicator = document.getElementById('video-drop-indicator');
+        let isUsingVideoFile = false;
+
+        wrapper.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            wrapper.classList.add('dragover');
+            if (dropIndicator) dropIndicator.style.setProperty('display', 'flex', 'important');
+        });
+
+        wrapper.addEventListener('dragleave', (e) => {
+            wrapper.classList.remove('dragover');
+            if (dropIndicator) dropIndicator.style.display = 'none';
+        });
+
+        wrapper.addEventListener('drop', (e) => {
+            e.preventDefault();
+            wrapper.classList.remove('dragover');
+            if (dropIndicator) dropIndicator.style.display = 'none';
+
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('video/')) {
+                loadVideoFile(file);
+            } else {
+                alert("올바른 동영상 파일(.mp4, .mov 등)을 내려놓아 주세요.");
+            }
+        });
+
+        function loadVideoFile(file) {
+            // Stop current webcam stream if any
+            if (video.srcObject) {
+                const stream = video.srcObject;
+                const tracks = stream.getTracks();
+                tracks.forEach(track => track.stop());
+                video.srcObject = null;
+            }
+
+            isUsingVideoFile = true;
+            document.getElementById('btn-webcam').style.display = 'inline-block';
+
+            // Create object URL and play
+            const objectUrl = URL.createObjectURL(file);
+            video.src = objectUrl;
+            video.loop = true;
+            video.muted = true;
+            video.removeAttribute('srcObject');
+
+            video.onloadedmetadata = () => {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                video.play().then(() => {
+                    console.log("Dropped video playing successfully.");
+                    resetStats();
+                    updateCameraGuide();
+                    document.getElementById('camera-guide').innerText = "📹 동영상 파일 분석 중: " + file.name;
+                }).catch(playErr => {
+                    console.warn("Error playing dropped video:", playErr);
+                });
+            };
+        }
+
+        window.switchToWebcam = async function() {
+            isUsingVideoFile = false;
+            video.src = "";
+            video.loop = false;
+            document.getElementById('btn-webcam').style.display = 'none';
+            await initCamera();
+            resetStats();
         };
 
         if (document.readyState === 'loading') {
