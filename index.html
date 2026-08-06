@@ -1,24 +1,22 @@
 <!DOCTYPE html>
 <html lang="ko">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- COOP/COEP Service Worker for GitHub Pages high-speed WASM multithreading -->
-    <title>AI PT Studio — Premium Real-Time Edge AI Tracker</title>
+    <script src="coi-serviceworker.js"></script>
+    <title>GRU Fitness — On-device AI Fitness Assistant</title>
     <!-- Google Fonts: Outfit & Noto Sans KR -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Outfit:wght@300;400;600;800&display=swap"
-        rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
     <!-- ONNX Runtime Web Local Serving -->
-    <script src="static/ort.min.js"></script>
+    <script src="./static/ort.min.js"></script>
 
     <!-- Global diagnostics capture for early scripting & network errors -->
     <script>
-        window.addEventListener('error', function (e) {
+        window.addEventListener('error', function(e) {
             // Check if it is a network resource load failure
             let errMsg = e.message;
             let errSrc = e.filename ? e.filename + ':' + e.lineno : '';
@@ -28,8 +26,8 @@
             }
             showDiagnosticError(errMsg || '스크립트 실행 오류가 감지되었습니다.', errSrc);
         }, true); // Use capture phase to catch network resource loading failures (CORS, 404)
-
-        window.addEventListener('unhandledrejection', function (e) {
+        
+        window.addEventListener('unhandledrejection', function(e) {
             showDiagnosticError('비동기 처리 에러: ' + (e.reason ? e.reason.message || e.reason : '알 수 없는 거절'));
         });
 
@@ -40,12 +38,12 @@
                 const statusText = document.getElementById("loader-status-text");
                 const progressBar = document.getElementById("loader-progress-bar");
                 const percentText = document.getElementById("loader-percentage-text");
-
+                
                 if (errorLog && content) {
                     errorLog.style.display = 'block';
                     const srcInfo = source ? `\n[위치]: ${source}` : '';
                     content.innerText = `[진단 데이터]: ${message}${srcInfo}`;
-
+                    
                     if (statusText) statusText.innerText = "오류 발생! 시스템 진단 결과를 확인하세요.";
                     if (percentText) percentText.innerText = "ERR";
                     if (progressBar) {
@@ -60,26 +58,18 @@
 
     <style>
         :root {
-            --bg-base: #f5f5f7;
-            /* Apple Signature Light Gray */
-            --bg-surface: #ffffff;
-            /* Crisp Solid White */
-            --border-color: rgba(0, 0, 0, 0.08);
-            /* Minimal Neutral Border */
-            --primary: #0071e3;
-            /* Apple Signature Blue */
+            --bg-base: #f5f5f7; /* Apple Signature Light Gray */
+            --bg-surface: #ffffff; /* Crisp Solid White */
+            --border-color: rgba(0, 0, 0, 0.08); /* Minimal Neutral Border */
+            --primary: #0071e3; /* Apple Signature Blue */
             --primary-glow: rgba(0, 113, 227, 0.15);
             --accent-cyan: #0071e3;
-            --accent-emerald: #34c759;
-            /* iOS green */
+            --accent-emerald: #34c759; /* iOS green */
             --accent-emerald-glow: rgba(52, 199, 89, 0.15);
-            --accent-rose: #ff3b30;
-            /* iOS red */
+            --accent-rose: #ff3b30; /* iOS red */
             --accent-rose-glow: rgba(255, 59, 48, 0.15);
-            --text-main: #1d1d1f;
-            /* Apple Charcoal */
-            --text-muted: #86868b;
-            /* Apple Gray */
+            --text-main: #1d1d1f; /* Apple Charcoal */
+            --text-muted: #86868b; /* Apple Gray */
         }
 
         * {
@@ -147,8 +137,7 @@
             gap: 10px;
             background: #ffffff;
             padding: 8px 18px;
-            border-radius: 980px;
-            /* Apple pill-shaped status */
+            border-radius: 980px; /* Apple pill-shaped status */
             border: 1px solid var(--border-color);
             font-size: 0.82rem;
             font-weight: 500;
@@ -170,8 +159,7 @@
         }
 
         .status-dot.loading {
-            background-color: #ff9500;
-            /* iOS orange */
+            background-color: #ff9500; /* iOS orange */
             animation: pulse 0.8s infinite alternate;
         }
 
@@ -217,12 +205,6 @@
             border-radius: 14px;
             overflow: hidden;
             border: 1px solid rgba(0, 0, 0, 0.06);
-            transition: all 0.2s ease;
-        }
-
-        .camera-wrapper.dragover {
-            border: 2px dashed #0071e3;
-            background: rgba(0, 113, 227, 0.05);
         }
 
         video#webcam {
@@ -271,7 +253,7 @@
             font-weight: 600;
             color: var(--text-main);
             letter-spacing: 0.3px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
         }
 
         .overlay-state-badge {
@@ -293,8 +275,7 @@
         }
 
         .state-down {
-            background: rgba(0, 113, 227, 0.85);
-            /* Apple Blue */
+            background: rgba(0, 113, 227, 0.85); /* Apple Blue */
             box-shadow: 0 4px 15px rgba(0, 113, 227, 0.3);
         }
 
@@ -642,8 +623,7 @@
         }
 
         .btn-primary:hover {
-            background: #0062c3;
-            /* Darker Apple Blue */
+            background: #0062c3; /* Darker Apple Blue */
             box-shadow: 0 6px 16px rgba(0, 113, 227, 0.25);
             transform: translateY(-1px);
         }
@@ -691,42 +671,27 @@
             background-color: white;
             transition: .2s cubic-bezier(0.4, 0, 0.2, 1);
             border-radius: 50%;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
         }
 
-        input:checked+.toggle-slider {
+        input:checked + .toggle-slider {
             background-color: var(--accent-emerald);
         }
 
-        input:checked+.toggle-slider:before {
+        input:checked + .toggle-slider:before {
             transform: translateX(20px);
         }
 
         /* Animations */
         @keyframes pulse {
-            0% {
-                transform: scale(1);
-                opacity: 0.8;
-            }
-
-            100% {
-                transform: scale(1.1);
-                opacity: 1;
-            }
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(1.1); opacity: 1; }
         }
 
         @keyframes highlight-pulse {
-            0% {
-                transform: scale(1);
-            }
-
-            50% {
-                transform: scale(1.02);
-            }
-
-            100% {
-                transform: scale(1);
-            }
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
         }
 
         footer {
@@ -843,37 +808,29 @@
         }
     </style>
 </head>
-
 <body>
 
     <!-- Cyberpunk Loader Overlay -->
     <div id="loader-overlay">
         <div class="loader-content">
-            <h2 class="loader-title">GRU AI Fitness Assistant</h2>
+            <div class="loader-logo">G</div>
+            <h2 class="loader-title">AI PT STUDIO — EDGE AI</h2>
             <p class="loader-subtitle">최초 구동에 필요한 고성능 AI 모듈을 다운로드하고 있습니다.</p>
-
+            
             <div class="progress-container">
                 <div id="loader-progress-bar" class="progress-bar-fill"></div>
             </div>
-
+            
             <div class="progress-text-row">
                 <span id="loader-status-text">연결 대기 중...</span>
                 <span id="loader-percentage-text">0%</span>
             </div>
-
+            
             <p class="loader-cache-tip">⚠️ 첫 접속 시에만 다운로드하며, 이후에는 브라우저 캐시에서 즉시 로드됩니다.</p>
 
-            <!-- TTS 활성화용 시작 버튼 (로딩 완료 후 표시) -->
-            <button id="start-btn" onclick="handleStartButton()"
-                style="display:none; margin-top:24px; width:100%; padding:14px; background:var(--primary); color:white; border:none; border-radius:12px; font-size:1rem; font-weight:600; cursor:pointer; box-shadow:0 4px 12px rgba(0,113,227,0.3); transition: all 0.2s ease;">
-                ▶ 운동 시작
-            </button>
-
             <!-- Diagnostic error console -->
-            <div id="loader-error-log"
-                style="display: none; margin-top: 20px; padding: 14px; background: rgba(244, 63, 94, 0.08); border: 1px dashed var(--accent-rose); border-radius: 12px; font-family: monospace; font-size: 0.78rem; color: #fda4af; text-align: left; max-height: 120px; overflow-y: auto; box-shadow: 0 0 10px rgba(244, 63, 94, 0.15);">
-                <div
-                    style="font-weight: 700; color: #f43f5e; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+            <div id="loader-error-log" style="display: none; margin-top: 20px; padding: 14px; background: rgba(244, 63, 94, 0.08); border: 1px dashed var(--accent-rose); border-radius: 12px; font-family: monospace; font-size: 0.78rem; color: #fda4af; text-align: left; max-height: 120px; overflow-y: auto; box-shadow: 0 0 10px rgba(244, 63, 94, 0.15);">
+                <div style="font-weight: 700; color: #f43f5e; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
                     <span style="animation: pulse 0.5s infinite alternate;">🔴</span> SYSTEM DIAGNOSTIC ERROR:
                 </div>
                 <div id="error-log-content" style="white-space: pre-wrap; line-height: 1.4;"></div>
@@ -881,28 +838,15 @@
         </div>
     </div>
 
-    <!-- Login Overlay (Disabled for static client-side run) -->
-    <div id="login-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:10000; display:none; align-items:center; justify-content:center; backdrop-filter:blur(10px);">
-        <div style="background:white; padding:40px; border-radius:20px; width:90%; max-width:400px; text-align:center;">
-            <h2 style="margin-bottom:10px;">AI PT 로그인</h2>
-            <p style="color:#666; margin-bottom:30px;">기존 기록을 불러오거나 새로 등록하세요.</p>
-            <input type="text" id="user-id" placeholder="아이디" style="width:100%; padding:14px; margin-bottom:12px; border:1px solid #ddd; border-radius:12px; font-size:1rem;">
-            <input type="password" id="user-pw" placeholder="비밀번호" style="width:100%; padding:14px; margin-bottom:24px; border:1px solid #ddd; border-radius:12px; font-size:1rem;">
-            <div style="display:flex; gap:10px;">
-                <button onclick="handleAuth('login')" style="flex:1; padding:16px; background:#0071e3; color:white; border:none; border-radius:12px; font-size:1.1rem; font-weight:600; cursor:pointer;">로그인</button>
-                <button onclick="handleAuth('register')" style="flex:1; padding:16px; background:#34c759; color:white; border:none; border-radius:12px; font-size:1.1rem; font-weight:600; cursor:pointer;">회원가입</button>
-            </div>
-        </div>
-    </div>
-
     <header>
 
         <div class="logo-section">
+            <div class="logo-badge">G</div>
             <div>
-                <h1>GRU AI Fitness Assistant</h1>
+                <h1>AI PT STUDIO — EDGE AI</h1>
             </div>
         </div>
-
+        
         <div class="status-pill">
             <div id="conn-dot" class="status-dot"></div>
             <span id="conn-text">로딩 중...</span>
@@ -915,49 +859,35 @@
             <div class="camera-wrapper">
                 <video id="webcam" autoplay playsinline muted></video>
                 <canvas id="canvas-stream"></canvas>
-
-                <!-- Drag and drop indicator -->
-                <div id="video-drop-indicator" style="display:none; position:absolute; inset:0; background:rgba(0,113,227,0.2); flex-direction:column; align-items:center; justify-content:center; color:white; font-size:1.2rem; font-weight:bold; backdrop-filter:blur(4px); z-index:10; pointer-events:none; border:2px dashed #0071e3; border-radius:14px;">
-                    <span style="font-size:2.5rem; margin-bottom:10px;">📥</span>
-                    <span>여기에 동영상 파일을 내려놓으세요</span>
-                </div>
-
+                
                 <div class="camera-overlay">
                     <div class="overlay-top">
                         <span id="guide-badge" class="overlay-badge fps-badge">FPS --</span>
                         <div id="state-badge" class="overlay-state-badge state-ready">READY</div>
                     </div>
-
+                    
                     <div class="overlay-bottom">
                         <div id="camera-guide" class="camera-guide-box">
                             카메라 가이드: 준비 중...
                         </div>
-                        <span id="ai-prediction-dot" class="overlay-badge"
-                            style="background: rgba(16, 185, 129, 0.8);">AI: --</span>
-                        <div id="live-debug-console"
-                            style="margin-top: 10px; font-size: 0.75rem; font-family: monospace; padding: 8px 12px; border-radius: 8px; background: rgba(15, 23, 42, 0.85); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); display: none; max-width: 320px; white-space: normal; word-break: break-all; pointer-events: auto; backdrop-filter: blur(10px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5); text-align: left;">
-                        </div>
+                        <span id="ai-prediction-dot" class="overlay-badge" style="background: rgba(16, 185, 129, 0.8);">AI: --</span>
+                        <div id="live-debug-console" style="margin-top: 10px; font-size: 0.75rem; font-family: monospace; padding: 8px 12px; border-radius: 8px; background: rgba(15, 23, 42, 0.85); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); display: none; max-width: 320px; white-space: normal; word-break: break-all; pointer-events: auto; backdrop-filter: blur(10px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5); text-align: left;"></div>
                     </div>
                 </div>
             </div>
-
-            <div class="sound-controller" style="flex-wrap: wrap; gap: 15px;">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <span>🔊 실시간 브라우저 100% 온디바이스 음성 코칭 및 경보 효과음 활성화</span>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="voice-enable" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-                <button id="btn-webcam" class="btn btn-primary" style="display: none; padding: 6px 12px; font-size: 0.85rem; background: #0071e3; border-radius: 8px; font-weight: 600; color: white; border: none; cursor: pointer;" onclick="switchToWebcam()">
-                    📷 실시간 카메라로 전환
-                </button>
+            
+            <div class="sound-controller">
+                <span>🔊 실시간 브라우저 100% 온디바이스 음성 코칭 및 경보 효과음 활성화</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="voice-enable" checked>
+                    <span class="toggle-slider"></span>
+                </label>
             </div>
         </section>
 
         <!-- Right Column: Control Center & Real-Time Stats -->
         <section class="controls-panel">
-
+            
             <!-- Card 1: Exercise Selector -->
             <div class="glass-card">
                 <div class="panel-title">운동 종목 선택</div>
@@ -981,11 +911,9 @@
             <div class="glass-card">
                 <div class="panel-title">
                     <span>실시간 운동 평가지표</span>
-                    <span id="measuring-indicator"
-                        style="color: var(--accent-cyan); font-size: 0.75rem; text-transform: uppercase; font-weight: 700; display:none;">●
-                        측정 중</span>
+                    <span id="measuring-indicator" style="color: var(--accent-cyan); font-size: 0.75rem; text-transform: uppercase; font-weight: 700; display:none;">● 측정 중</span>
                 </div>
-
+                
                 <div class="analytics-grid">
                     <!-- Circle Total Score -->
                     <div class="gauge-container">
@@ -1016,7 +944,7 @@
                                 <div id="accuracy-bar" class="metric-bar-fill fill-accuracy"></div>
                             </div>
                         </div>
-
+                        
                         <div class="metric-group">
                             <div class="metric-info">
                                 <span class="metric-label">좌우 안정성</span>
@@ -1058,10 +986,9 @@
                         <div class="summary-lbl">최고 점수</div>
                     </div>
                 </div>
-
+                
                 <div class="actions-row">
                     <button class="btn btn-primary" onclick="resetStats()">🔄 세션 기록 리셋</button>
-                    <button class="btn" style="background: var(--accent-emerald); color: white;" onclick="exportSessionData()">💾 결과 저장 (로컬 저장)</button>
                 </div>
             </div>
 
@@ -1083,9 +1010,9 @@
             debugConsole.style.borderColor = isErr ? 'rgba(239, 68, 68, 0.3)' : 'rgba(251, 191, 36, 0.3)';
             debugConsole.innerText = `⚠️ [${isErr ? "오류" : "경고"}] ${msg}`;
         };
-
+        
         const _err = console.error;
-        console.error = function (...args) {
+        console.error = function(...args) {
             const str = args.join(' ');
             if (str.includes("inference_feedback_manager") || str.includes("signature") || str.includes("feedback_manager")) return;
 
@@ -1096,9 +1023,8 @@
         };
 
         const _warn = console.warn;
-        console.warn = function (...args) {
+        console.warn = function(...args) {
             const str = args.join(' ');
-            // Filter out internal MediaPipe inference_feedback_manager warnings to keep UI clean
             if (str.includes("inference_feedback_manager") || str.includes("signature") || str.includes("feedback_manager")) return;
 
             _warn.apply(console, args);
@@ -1115,7 +1041,7 @@
         let isCameraActive = false;
         let lastSpeakTime = 0;
         const speechCooldown = 4000;
-
+        
         let featureBuffer = []; // stores normalized 132-dimension coordinates
         let landmarkHistory = []; // stores shoulder x position standard deviation
         let onnxSession = null;
@@ -1123,11 +1049,7 @@
         let onnxFrameCounter = 0;
         let isOnnxRunning = false; // ONNX 추론 중복 실행 방지 플래그
         let mediapipeFrameCounter = 0; // MediaPipe 호출 빈도 제어용
-
-        // Off-screen scaling canvas for optimizing CPU inference on high-resolution videos
-        const offscreenCanvas = document.createElement('canvas');
-        const offscreenCtx = offscreenCanvas.getContext('2d');
-
+        
         // Exponential Moving Average Landmark Smoothing Filter (Zero-latency stabilizer)
         let smoothedLandmarks = null;
         const SMOOTHING_FACTOR = 0.22; // lower is smoother, higher is more responsive (optimized for noise reduction)
@@ -1148,12 +1070,12 @@
             for (let i = 0; i < rawLandmarks.length; i++) {
                 const prev = smoothedLandmarks[i];
                 const curr = rawLandmarks[i];
-
+                
                 // Real-time Exponential Smoothing Formula
                 prev.x = SMOOTHING_FACTOR * curr.x + (1 - SMOOTHING_FACTOR) * prev.x;
                 prev.y = SMOOTHING_FACTOR * curr.y + (1 - SMOOTHING_FACTOR) * prev.y;
                 prev.z = SMOOTHING_FACTOR * curr.z + (1 - SMOOTHING_FACTOR) * prev.z;
-
+                
                 const currVis = curr.visibility !== undefined ? curr.visibility : 1;
                 prev.visibility = SMOOTHING_FACTOR * currVis + (1 - SMOOTHING_FACTOR) * prev.visibility;
             }
@@ -1165,7 +1087,7 @@
         let repScores = [];
         let peakScore = 0;
         let prevScore = 0;
-
+        
         const video = document.getElementById('webcam');
         const canvas = document.getElementById('canvas-stream');
         const ctx = canvas.getContext('2d', { alpha: false }); // alpha:false로 합성 비용 제거
@@ -1181,7 +1103,7 @@
         function playSynthSound(type) {
             if (!document.getElementById('voice-enable').checked) return;
             if (audioCtx.state === 'suspended') audioCtx.resume();
-
+            
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.connect(gain);
@@ -1195,7 +1117,7 @@
                 gain.gain.setValueAtTime(0.12, now);
                 gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
                 osc.start(now); osc.stop(now + 0.25);
-            }
+            } 
             else if (type === 'pop') {
                 osc.type = 'triangle';
                 osc.frequency.setValueAtTime(440, now);
@@ -1203,7 +1125,7 @@
                 gain.gain.setValueAtTime(0.08, now);
                 gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
                 osc.start(now); osc.stop(now + 0.15);
-            }
+            } 
             else if (type === 'glass') {
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(1046.5, now);
@@ -1218,7 +1140,7 @@
                 gain2.gain.setValueAtTime(0.05, now); gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
                 osc2.connect(gain2); gain2.connect(audioCtx.destination);
                 osc2.start(now); osc2.stop(now + 0.3);
-            }
+            } 
             else if (type === 'funk') {
                 osc.type = 'sawtooth';
                 osc.frequency.setValueAtTime(180, now);
@@ -1237,9 +1159,9 @@
         // Centralized priority-aware and race-safe TTS scheduler
         function speakTTS(text, isPriority = false) {
             if (!document.getElementById('voice-enable').checked || !text) return;
-
+            
             const now = Date.now();
-
+            
             const isGood = text.includes("완벽") || text.includes("좋아") || text.includes("유지");
             const limit = isGood ? 10000 : speechCooldown;
 
@@ -1252,7 +1174,7 @@
             // If a priority speech (e.g. rep count) is playing, queue the feedback instead of ignoring it
             if (isSpeakingPriority && !isPriority) {
                 pendingFeedbackText = text;
-                return;
+                return; 
             }
 
             // Clear any pending speech execution timeout
@@ -1317,8 +1239,8 @@
         // --- 100% Client-Side Physics & State Machine ---
 
         const THRESHOLDS = {
-            "squat": { key: "knee", down: 95, up: 155, inv: false },
-            "pushup": { key: "elbow", down: 85, up: 150, inv: false },
+            "squat":  { key: "knee",    down: 95,  up: 155, inv: false },
+            "pushup": { key: "elbow",   down: 85,  up: 150, inv: false },
             "pullup": { key: "left_elbow", key2: "right_elbow", down: 150, up: 65, inv: true }
         };
 
@@ -1438,7 +1360,7 @@
             const sy = (lm[11].y + lm[12].y) / 2.0;
             const sz = (lm[11].z + lm[12].z) / 2.0;
 
-            const dist = Math.sqrt((cx - sx) ** 2 + (cy - sy) ** 2 + (cz - sz) ** 2);
+            const dist = Math.sqrt((cx - sx)**2 + (cy - sy)**2 + (cz - sz)**2);
             const scale = dist > 0.01 ? dist : 1.0;
 
             const coords = [];
@@ -1454,9 +1376,9 @@
         function calculateAngle(a, b, c) {
             const ba = [a.x - b.x, a.y - b.y];
             const bc = [c.x - b.x, c.y - b.y];
-            const dot = ba[0] * bc[0] + ba[1] * bc[1];
-            const normBa = Math.sqrt(ba[0] ** 2 + ba[1] ** 2);
-            const normBc = Math.sqrt(bc[0] ** 2 + bc[1] ** 2);
+            const dot = ba[0]*bc[0] + ba[1]*bc[1];
+            const normBa = Math.sqrt(ba[0]**2 + ba[1]**2);
+            const normBc = Math.sqrt(bc[0]**2 + bc[1]**2);
             const cos = dot / (normBa * normBc + 1e-6);
             const angle = Math.acos(Math.max(-1.0, Math.min(1.0, cos)));
             return angle * (180 / Math.PI);
@@ -1466,7 +1388,7 @@
             const lv = Math.min(...leftPts.map(idx => lm[idx].visibility));
             const rv = Math.min(...rightPts.map(idx => lm[idx].visibility));
             if (lv < 0.65 && rv < 0.65) return null;
-
+            
             const key = leftPts.join(',');
             let chosenSide = lastChosenSide[key];
 
@@ -1514,7 +1436,7 @@
         }
 
         const IDEAL_ANGLES = {
-            "squat": { knee: 90, trunk: 75 },
+            "squat":  { knee: 90,  trunk: 75 },
             "pushup": { elbow: 90, body_line: 180 },
             "pullup": { left_elbow: 60, right_elbow: 60 }
         };
@@ -1602,15 +1524,15 @@
             } else if (exercise === "pullup") {
                 const le = angles["left_elbow"] !== undefined ? angles["left_elbow"] : 180;
                 const re = angles["right_elbow"] !== undefined ? angles["right_elbow"] : 180;
-
+                
                 const activeElbows = [];
                 if (le < 170) activeElbows.push(le);
                 if (re < 170) activeElbows.push(re);
                 const avgElbow = activeElbows.length > 0 ? (activeElbows.reduce((a, b) => a + b, 0) / activeElbows.length) : 180;
 
-                if (avgElbow > 100 && avgElbow < 140) {
+                if (avgElbow > 100) {
                     feedbacks.push([0, "턱이 바에 닿을 때까지 올려주세요"]);
-                } else if (avgElbow > 80 && avgElbow <= 100) {
+                } else if (avgElbow > 80) {
                     feedbacks.push([1, "조금만 더 올려주세요"]);
                 }
 
@@ -1639,7 +1561,7 @@
         // --- Engine Initialization (MediaPipe WASM and ONNX Web) ---
 
         // Set paths for ONNX Runtime Web WASM binaries to load from standard CDN
-        ort.env.wasm.wasmPaths = 'static/';
+        ort.env.wasm.wasmPaths = './static/';
         ort.env.wasm.numThreads = 1;
         ort.env.wasm.proxy = false;
         ort.env.wasm.simd = false; // SIMD를 비활성화하여 Safari 등 특정 브라우저 엔진에서 발생하는 WASM 메모리 정렬 및 컴파일 오류를 원천 차단합니다.
@@ -1672,15 +1594,15 @@
 
         async function startPreloadingAssets() {
             const preloadFiles = [
-                { key: "pose_landmarker", url: "pose_landmarker_full.task", name: "포즈 추적 모델 (9.4 MB)", size: 9398198 },
-                { key: "squat", url: "models/squat.onnx?v=3", name: "스쿼트 AI 모델 (314 KB)", size: 313603 },
-                { key: "pushup", url: "models/pushup.onnx?v=3", name: "푸시업 AI 모델 (314 KB)", size: 313603 },
-                { key: "pullup", url: "models/pullup.onnx?v=3", name: "풀업 AI 모델 (314 KB)", size: 313603 }
+                { key: "pose_landmarker", url: "./pose_landmarker_full.task", name: "포즈 추적 모델 (9.4 MB)", size: 9398198 },
+                { key: "squat", url: "./models/squat.onnx", name: "스쿼트 AI 모델 (314 KB)", size: 313915 },
+                { key: "pushup", url: "./models/pushup.onnx", name: "푸시업 AI 모델 (314 KB)", size: 313915 },
+                { key: "pullup", url: "./models/pullup.onnx", name: "풀업 AI 모델 (314 KB)", size: 313915 }
             ];
 
             const totalBytes = preloadFiles.reduce((acc, f) => acc + f.size, 0);
             const loadedBytesMap = {};
-
+            
             preloadFiles.forEach(f => { loadedBytesMap[f.url] = 0; });
 
             const statusText = document.getElementById("loader-status-text");
@@ -1690,38 +1612,38 @@
             try {
                 for (const file of preloadFiles) {
                     statusText.innerText = `${file.name} 다운로드 중...`;
-
+                    
                     const response = await fetch(file.url);
                     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
+                    
                     const contentLength = response.headers.get('content-length');
                     const fileTotal = contentLength ? parseInt(contentLength, 10) : file.size;
-
+                    
                     const reader = response.body.getReader();
                     const chunks = [];
                     let fileLoaded = 0;
-
+                    
                     while (true) {
                         const { done, value } = await reader.read();
                         if (done) break;
                         chunks.push(value);
                         fileLoaded += value.length;
                         loadedBytesMap[file.url] = fileLoaded;
-
+                        
                         const totalLoaded = Object.values(loadedBytesMap).reduce((a, b) => a + b, 0);
                         const percent = Math.min(99, Math.round((totalLoaded / totalBytes) * 100));
-
+                        
                         progressBar.style.width = `${percent}%`;
                         percentageText.innerText = `${percent}%`;
                     }
-
+                    
                     const allChunks = new Uint8Array(fileLoaded);
                     let position = 0;
                     for (const chunk of chunks) {
                         allChunks.set(chunk, position);
                         position += chunk.length;
                     }
-
+                    
                     preloadedAssets[file.key] = allChunks.buffer;
                 }
 
@@ -1731,10 +1653,10 @@
 
                 await initEngine();
 
-                // 로딩 완료 → 시작 버튼 표시 (클릭으로 TTS 활성화 후 오버레이 해제)
-                statusText.innerText = "준비 완료! 아래 버튼을 눌러 운동을 시작하세요.";
-                document.getElementById("start-btn").style.display = "block";
-
+                // Smoothly dissolve the loading overlay
+                const loader = document.getElementById("loader-overlay");
+                loader.classList.add("fade-out");
+                
             } catch (err) {
                 console.error("Asset preloading failed:", err);
                 statusText.innerText = "다운로드 실패! 인터넷을 확인하고 새로고침 해주세요.";
@@ -1746,12 +1668,12 @@
 
         async function initEngine() {
             updateConnectionStatus('loading', 'MediaPipe 모델 로드 중...');
-
+            
             try {
                 const vision = await FilesetResolver.forVisionTasks(
-                    "static/wasm"
+                    "./static/wasm"
                 );
-
+                
                 // preloaded pose_landmarker buffer를 Uint8Array로 감싸서 바로 로드
                 poseLandmarker = await PoseLandmarker.createFromOptions(vision, {
                     baseOptions: {
@@ -1764,13 +1686,13 @@
                     minPosePresenceConfidence: 0.65,
                     minTrackingConfidence: 0.65
                 });
-
+                
                 console.log("MediaPipe initialized successfully from preloaded buffer.");
-
+                
                 await loadONNXModel(activeExercise);
-
+                
                 initCamera();
-
+                
             } catch (err) {
                 console.error("Initialization failed:", err);
                 const errMsg = extractWasmErrorMessage(err);
@@ -1783,21 +1705,21 @@
             updateConnectionStatus('loading', `${exercise.toUpperCase()} AI 모델 불러오는 중...`);
             try {
                 if (onnxSession) {
-                    try { onnxSession.release(); } catch (e) { /* ignore */ }
+                    try { onnxSession.release(); } catch(e) { /* ignore */ }
                     onnxSession = null;
                 }
                 featureBuffer = [];
                 isOnnxRunning = false;
-
+                
                 const sessionOptions = {
                     executionProviders: ['wasm'],
                     graphOptimizationLevel: 'all',
                     enableCpuMemArena: false
                 };
-
+                
                 // 1차: URL 경로 기반 로딩
                 try {
-                    onnxSession = await ort.InferenceSession.create(`models/${exercise}.onnx?v=3`, sessionOptions);
+                    onnxSession = await ort.InferenceSession.create(`./models/${exercise}.onnx`, sessionOptions);
                     console.log(`${exercise} ONNX model loaded via URL path.`);
                 } catch (urlErr) {
                     // 2차 fallback: 프리로드된 버퍼 사용
@@ -1806,10 +1728,10 @@
                     onnxSession = await ort.InferenceSession.create(new Uint8Array(alignedBuf), sessionOptions);
                     console.log(`${exercise} ONNX model loaded from preloaded buffer (fallback).`);
                 }
-
+                
                 // 진단: 모델 I/O 정보 출력
                 console.log(`[ONNX 진단] inputNames: ${onnxSession.inputNames}, outputNames: ${onnxSession.outputNames}`);
-
+                
                 // 진단: 더미 데이터로 테스트 추론 실행
                 try {
                     const testInput = new Float32Array(1 * 30 * 132);
@@ -1825,7 +1747,7 @@
                     onnxSession = null;
                     return;
                 }
-
+                
                 updateConnectionStatus('connected', 'AI PT 엔진 구동 완료');
             } catch (err) {
                 console.error("ONNX Load Error:", err);
@@ -1839,7 +1761,7 @@
             const dot = document.getElementById('conn-dot');
             const label = document.getElementById('conn-text');
             dot.className = 'status-dot';
-
+            
             if (status === 'connected') {
                 dot.classList.add('connected');
             } else if (status === 'loading') {
@@ -1853,10 +1775,10 @@
                 // 모바일 기기의 경우 해상도를 더 낮춰 GPU/CPU 부하 감소
                 const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
                 const stream = await navigator.mediaDevices.getUserMedia({
-                    video: {
-                        width: { ideal: isMobile ? 480 : 640 },
-                        height: { ideal: isMobile ? 270 : 360 },
-                        frameRate: { ideal: 30 }
+                    video: { 
+                        width: { ideal: isMobile ? 480 : 640 }, 
+                        height: { ideal: isMobile ? 270 : 360 }, 
+                        frameRate: { ideal: 30 } 
                     },
                     audio: false
                 });
@@ -1864,7 +1786,7 @@
                 video.addEventListener('loadedmetadata', () => {
                     canvas.width = video.videoWidth;
                     canvas.height = video.videoHeight;
-
+                    
                     // 브라우저 자동재생 차단 방지를 위해 명시적으로 play() 호출 및 프로미스 처리
                     video.play().then(() => {
                         console.log("Webcam video playing successfully.");
@@ -1921,30 +1843,13 @@
                 lastMpTimestamp = mpTimestamp;
 
                 try {
-                    // Capping input frame resolution to 640px max dimension for CPU delegate safety
-                    const maxDim = 640;
-                    let w = video.videoWidth;
-                    let h = video.videoHeight;
-                    if (w > maxDim || h > maxDim) {
-                        if (w > h) {
-                            h = Math.round((h * maxDim) / w);
-                            w = maxDim;
-                        } else {
-                            w = Math.round((w * maxDim) / h);
-                            h = maxDim;
-                        }
-                    }
-                    offscreenCanvas.width = w;
-                    offscreenCanvas.height = h;
-                    offscreenCtx.drawImage(video, 0, 0, w, h);
-
-                    const results = poseLandmarker.detectForVideo(offscreenCanvas, mpTimestamp);
+                    const results = poseLandmarker.detectForVideo(video, mpTimestamp);
                     // tasks-vision API 규격에 맞춰 landmarks와 poseLandmarks 둘 다 대응하도록 수정
                     const landmarks = results.landmarks || results.poseLandmarks;
-
+                    
                     if (landmarks && landmarks.length > 0) {
                         const lm = smoothPoseLandmarks(landmarks[0]);
-
+                        
                         // 1. 특징 벡터 추출
                         const feat = getFeatureVector(lm);
                         featureBuffer.push(feat);
@@ -1960,19 +1865,22 @@
 
                         // 3. Physics & State updates
                         const angles = getAngles(lm, activeExercise);
-
+                        
                         landmarkHistory.push({ left_shoulder_x: lm[11].x });
                         if (landmarkHistory.length > 30) landmarkHistory.shift();
 
-                        // Check correctness BEFORE updating the state machine to avoid race conditions.
-                        // We also decouple the strict "poseLabel === 'Good'" requirement from counting.
-                        if (stateMachineInstance.state === "down") {
+                        const stateData = stateMachineInstance.update(angles, activeExercise, 0);
+                        const scoreData = calculateScore(angles, activeExercise, poseLabel, landmarkHistory, stateData.state);
+                        const feedbackText = generateFeedback(angles, activeExercise, scoreData, stateData.state);
+
+                        // If currently in down state, check if posture has reached a good/correct state
+                        if (stateData.state === "down") {
                             let isCorrectThisFrame = false;
                             if (activeExercise === "squat") {
                                 const knee = angles["knee"];
                                 const trunk = angles["trunk"];
                                 if (knee !== undefined && trunk !== undefined) {
-                                    if (knee <= 105 && trunk >= 60) {
+                                    if (knee <= 105 && trunk >= 60 && poseLabel === "Good") {
                                         isCorrectThisFrame = true;
                                     }
                                 }
@@ -1980,7 +1888,7 @@
                                 const elbow = angles["elbow"];
                                 const bodyLine = angles["body_line"];
                                 if (elbow !== undefined && bodyLine !== undefined) {
-                                    if (elbow <= 100 && bodyLine >= 160) {
+                                    if (elbow <= 100 && bodyLine >= 160 && poseLabel === "Good") {
                                         isCorrectThisFrame = true;
                                     }
                                 }
@@ -1988,7 +1896,7 @@
                                 const le = angles["left_elbow"];
                                 const re = angles["right_elbow"];
                                 if (le !== undefined && re !== undefined) {
-                                    if (le <= 80 && re <= 80 && Math.abs(le - re) <= 20) {
+                                    if (le <= 80 && re <= 80 && Math.abs(le - re) <= 20 && poseLabel === "Good") {
                                         isCorrectThisFrame = true;
                                     }
                                 }
@@ -1998,10 +1906,6 @@
                                 stateMachineInstance.hasReachedGoodPoseThisRep = true;
                             }
                         }
-
-                        const stateData = stateMachineInstance.update(angles, activeExercise, 0);
-                        const scoreData = calculateScore(angles, activeExercise, poseLabel, landmarkHistory, stateData.state);
-                        const feedbackText = generateFeedback(angles, activeExercise, scoreData, stateData.state);
 
                         // 4. Draw skeleton
                         drawSkeletonOverlay(lm, poseLabel);
@@ -2036,12 +1940,12 @@
                 for (let i = 0; i < 30; i++) {
                     flattened.set(bufferSnapshot[i], i * 132);
                 }
-
+                
                 const tensor = new ort.Tensor('float32', flattened, [1, 30, 132]);
                 const feeds = { [onnxSession.inputNames[0]]: tensor };
                 const outputs = await onnxSession.run(feeds);
                 const outputData = outputs[onnxSession.outputNames[0]].data;
-
+                
                 const predictedClass = outputData[0] >= outputData[1] ? 0 : 1;
                 cachedPoseLabel = predictedClass === 0 ? "Good" : "Bad";
             } catch (err) {
@@ -2074,18 +1978,18 @@
             ctx.beginPath();
             ctx.strokeStyle = boneColor;
             ctx.lineWidth = 3.5;
-
+            
             connections.forEach(([i, j]) => {
                 const pt1 = landmarks[i];
                 const pt2 = landmarks[j];
-
+                
                 if (pt1 && pt2 && (pt1.visibility === undefined || pt1.visibility >= 0.3) && (pt2.visibility === undefined || pt2.visibility >= 0.3)) {
                     // Mirror mapping
                     const x1 = (1 - pt1.x) * canvas.width;
                     const y1 = pt1.y * canvas.height;
                     const x2 = (1 - pt2.x) * canvas.width;
                     const y2 = pt2.y * canvas.height;
-
+                    
                     ctx.moveTo(x1, y1);
                     ctx.lineTo(x2, y2);
                 }
@@ -2099,7 +2003,7 @@
 
                 const x = (1 - pt.x) * canvas.width;
                 const y = pt.y * canvas.height;
-
+                
                 ctx.beginPath();
                 // 11, 12, 23, 24 (어깨, 골반)은 크기 7, 나머지는 5.5
                 ctx.arc(x, y, idx === 11 || idx === 12 || idx === 23 || idx === 24 ? 7 : 5.5, 0, 2 * Math.PI);
@@ -2126,7 +2030,7 @@
             const aiBadge = document.getElementById('ai-badge');
             aiDot.innerText = `AI: ${poseLabel}`;
             aiBadge.innerText = poseLabel;
-
+            
             if (poseLabel === 'Good') {
                 aiDot.style.background = 'rgba(16, 185, 129, 0.85)';
                 aiDot.style.borderColor = 'var(--accent-emerald)';
@@ -2163,16 +2067,16 @@
             // 5. Count increased trigger or disallowed trigger
             if (stateData.countIncreased) {
                 playSynthSound('tink');
-
+                
                 speakTTS(stateData.count.toString(), true);
 
                 totalReps = stateData.count;
                 document.getElementById('sum-reps').innerText = totalReps;
-
+                
                 repScores.push(scoreData.total);
-                const avgScore = repScores.reduce((a, b) => a + b, 0) / repScores.length;
+                const avgScore = repScores.reduce((a,b)=>a+b, 0) / repScores.length;
                 document.getElementById('sum-avg').innerText = avgScore.toFixed(1);
-
+                
                 if (scoreData.total > peakScore) {
                     peakScore = scoreData.total;
                     document.getElementById('sum-peak').innerText = peakScore.toFixed(1);
@@ -2180,7 +2084,7 @@
             } else if (stateData.repDisallowed) {
                 playSynthSound('funk'); // Warning beep
                 speakTTS("자세가 올바르지 않아 개수가 인정되지 않았습니다.", true);
-
+                
                 const feedbackBubble = document.getElementById('feedback-bubble');
                 feedbackBubble.innerText = "자세가 올바르지 않아 개수가 인정되지 않았습니다.";
                 feedbackBubble.className = "feedback-bubble highlight";
@@ -2221,7 +2125,7 @@
         }
 
         // Switch exercise dynamically
-        window.changeExercise = async function (exercise) {
+        window.changeExercise = async function(exercise) {
             if (activeExercise === exercise) return;
             activeExercise = exercise;
 
@@ -2243,16 +2147,16 @@
             lastChosenSide = {};
 
             updateCameraGuide();
-
+            
             // Lazy load selected ONNX model
             await loadONNXModel(exercise);
         };
 
-        window.updateCameraGuide = function () {
+        window.updateCameraGuide = function() {
             document.getElementById('camera-guide').innerText = CAM_GUIDES[activeExercise];
         };
 
-        window.resetStats = function () {
+        window.resetStats = function() {
             stateMachineInstance.reset();
             landmarkHistory = [];
             featureBuffer = [];
@@ -2279,61 +2183,6 @@
             fb.className = "feedback-bubble highlight";
         };
 
-        let loggedInUserId = "";
-
-        window.handleAuth = async function(action) {
-            const id = document.getElementById('user-id').value.trim();
-            const pw = document.getElementById('user-pw').value;
-            if(!id || !pw) { alert("아이디와 비밀번호를 입력해주세요."); return; }
-
-            try {
-                // 형식: "userId:password:action"
-                const encodedAuth = btoa(unescape(encodeURIComponent(id + ":" + pw + ":" + action)));
-                const response = await fetch('/api/login', {
-                    method: 'POST',
-                    body: encodedAuth
-                });
-                
-                const result = await response.json();
-                if(result.status === "success") {
-                    loggedInUserId = id;
-                    document.getElementById('login-overlay').style.display = 'none';
-                    
-                    if(result.data) {
-                        totalReps = result.data.totalReps || 0;
-                        document.getElementById('sum-reps').innerText = totalReps;
-                        document.getElementById('sum-avg').innerText = (result.data.avgScore || 0).toFixed(1);
-                    }
-                    alert(result.message || `반갑습니다, ${id}님!`);
-                } else {
-                    alert("❌ 오류: " + result.message);
-                }
-            } catch(e) {
-                alert("서버 연결 실패. Java 서버를 확인하세요.");
-            }
-        };
-
-        window.exportSessionData = function () {
-            const sessionData = {
-                userId: "LocalUser",
-                exercise: activeExercise,
-                totalReps: totalReps,
-                avgScore: parseFloat(document.getElementById('sum-avg').innerText),
-                peakScore: peakScore,
-                scores: repScores,
-                timestamp: new Date().toISOString()
-            };
-
-            try {
-                const history = JSON.parse(localStorage.getItem('workout_history') || '[]');
-                history.push(sessionData);
-                localStorage.setItem('workout_history', JSON.stringify(history));
-                alert("✅ 세션 기록이 브라우저 로컬 저장소(localStorage)에 성공적으로 저장되었습니다!");
-            } catch (error) {
-                alert("❌ 저장 중 오류가 발생했습니다: " + error.message);
-            }
-        };
-
         function updateScoreGauge(score) {
             document.getElementById('score-value').innerText = score.toFixed(1);
             const circle = document.getElementById('gauge-circle');
@@ -2344,7 +2193,7 @@
         function updateProgressBar(id, value) {
             const label = document.getElementById(`${id}-val`);
             const bar = document.getElementById(`${id}-bar`);
-
+            
             if (value === null) {
                 label.innerText = '-- %';
                 bar.style.width = '0%';
@@ -2360,93 +2209,6 @@
             startPreloadingAssets();
         }
 
-        // 시작 버튼 클릭 핸들러 — 사용자 제스처 안에서 TTS 엔진 활성화
-        window.handleStartButton = function () {
-            // 빈 발화로 Web Speech API를 사용자 제스처 컨텍스트 내에서 초기화
-            const unlock = new SpeechSynthesisUtterance('');
-            window.speechSynthesis.speak(unlock);
-
-            // 로딩 오버레이 제거
-            const loader = document.getElementById("loader-overlay");
-            loader.classList.add("fade-out");
-
-            // 인트로 안내 TTS
-            setTimeout(() => {
-                speakTTS("AI PT 스튜디오 준비 완료. 자세를 잡고 운동을 시작해보세요.", true);
-            }, 300);
-        };
-
-        // Drag and Drop Event Listeners for Video Files
-        const wrapper = document.querySelector('.camera-wrapper');
-        const dropIndicator = document.getElementById('video-drop-indicator');
-        let isUsingVideoFile = false;
-
-        wrapper.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            wrapper.classList.add('dragover');
-            if (dropIndicator) dropIndicator.style.setProperty('display', 'flex', 'important');
-        });
-
-        wrapper.addEventListener('dragleave', (e) => {
-            wrapper.classList.remove('dragover');
-            if (dropIndicator) dropIndicator.style.display = 'none';
-        });
-
-        wrapper.addEventListener('drop', (e) => {
-            e.preventDefault();
-            wrapper.classList.remove('dragover');
-            if (dropIndicator) dropIndicator.style.display = 'none';
-
-            const file = e.dataTransfer.files[0];
-            if (file && file.type.startsWith('video/')) {
-                loadVideoFile(file);
-            } else {
-                alert("올바른 동영상 파일(.mp4, .mov 등)을 내려놓아 주세요.");
-            }
-        });
-
-        function loadVideoFile(file) {
-            // Stop current webcam stream if any
-            if (video.srcObject) {
-                const stream = video.srcObject;
-                const tracks = stream.getTracks();
-                tracks.forEach(track => track.stop());
-                video.srcObject = null;
-            }
-
-            isUsingVideoFile = true;
-            document.getElementById('btn-webcam').style.display = 'inline-block';
-
-            // Create object URL and play
-            const objectUrl = URL.createObjectURL(file);
-            video.src = objectUrl;
-            video.loop = true;
-            video.muted = true;
-            video.removeAttribute('srcObject');
-
-            video.onloadedmetadata = () => {
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                video.play().then(() => {
-                    console.log("Dropped video playing successfully.");
-                    resetStats();
-                    updateCameraGuide();
-                    document.getElementById('camera-guide').innerText = "📹 동영상 파일 분석 중: " + file.name;
-                }).catch(playErr => {
-                    console.warn("Error playing dropped video:", playErr);
-                });
-            };
-        }
-
-        window.switchToWebcam = async function() {
-            isUsingVideoFile = false;
-            video.src = "";
-            video.loop = false;
-            document.getElementById('btn-webcam').style.display = 'none';
-            await initCamera();
-            resetStats();
-        };
-
         if (document.readyState === 'loading') {
             window.addEventListener('DOMContentLoaded', initApp);
         } else {
@@ -2454,5 +2216,4 @@
         }
     </script>
 </body>
-
 </html>
